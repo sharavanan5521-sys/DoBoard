@@ -2,12 +2,15 @@ import { useState } from 'react'
 import type { Task } from '../../types'
 import TaskItem from './TaskItem'
 
-type Filter = 'all' | 'active' | 'done'
+type Filter = 'all' | 'active' | 'done' | 'archived'
 
 interface TaskListProps {
   tasks: Task[]
   loading: boolean
+  archivedTasks?: Task[]
+  archivedLoading?: boolean
   accentColor?: string
+  memberName?: (uid: string) => string
   onToggle: (task: Task) => void
   onDelete: (taskId: string) => void
   onTaskClick?: (task: Task) => void
@@ -17,6 +20,7 @@ const EMPTY_TEXT: Record<Filter, string> = {
   all: 'No tasks yet',
   active: 'Nothing active',
   done: 'Nothing done yet',
+  archived: 'Nothing archived',
 }
 
 function RowSkeleton() {
@@ -31,7 +35,10 @@ function RowSkeleton() {
 export default function TaskList({
   tasks,
   loading,
+  archivedTasks = [],
+  archivedLoading = false,
   accentColor = '#6366f1',
+  memberName,
   onToggle,
   onDelete,
   onTaskClick,
@@ -45,15 +52,25 @@ export default function TaskList({
     all: tasks.length,
     active: activeTasks.length,
     done: doneTasks.length,
+    archived: archivedTasks.length,
   }
 
   const filtered =
-    filter === 'active' ? activeTasks : filter === 'done' ? doneTasks : tasks
+    filter === 'active'
+      ? activeTasks
+      : filter === 'done'
+        ? doneTasks
+        : filter === 'archived'
+          ? archivedTasks
+          : tasks
+
+  const isLoading = filter === 'archived' ? archivedLoading : loading
 
   const tabs: { key: Filter; label: string }[] = [
     { key: 'all', label: 'All' },
     { key: 'active', label: 'Active' },
     { key: 'done', label: 'Done' },
+    { key: 'archived', label: 'Archived' },
   ]
 
   return (
@@ -85,7 +102,7 @@ export default function TaskList({
       </div>
 
       <div className="mt-4 space-y-2">
-        {loading ? (
+        {isLoading ? (
           <>
             <RowSkeleton />
             <RowSkeleton />
@@ -101,6 +118,7 @@ export default function TaskList({
               key={task.id}
               task={task}
               accentColor={accentColor}
+              memberName={memberName}
               onToggle={onToggle}
               onDelete={onDelete}
               onClick={onTaskClick}

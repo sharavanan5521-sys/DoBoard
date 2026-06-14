@@ -10,10 +10,16 @@ import {
   serverTimestamp,
   updateDoc,
   where,
+  writeBatch,
 } from 'firebase/firestore'
 import { db } from '../lib/firebase'
 import { useAuth } from '../contexts/AuthContext'
 import type { Task } from '../types'
+
+/** Fields of a Task a user can edit from the detail panel. */
+export type TaskUpdate = Partial<
+  Pick<Task, 'title' | 'description' | 'assignee' | 'priority' | 'dueDate'>
+>
 
 export interface TaskCounts {
   total: number
@@ -71,6 +77,9 @@ interface UseTasksResult {
   addTask: (title: string) => Promise<void>
   toggleDone: (task: Task) => Promise<void>
   deleteTask: (taskId: string) => Promise<void>
+  updateTask: (taskId: string, fields: TaskUpdate) => Promise<void>
+  setArchived: (taskId: string, archived: boolean) => Promise<void>
+  archiveAllDone: () => Promise<void>
 }
 
 /**
@@ -147,5 +156,93 @@ export function useTasks(boardId: string): UseTasksResult {
     await deleteDoc(doc(db, 'tasks', taskId))
   }
 
-  return { tasks, loading, addTask, toggleDone, deleteTask }
+  async function updateTask(taskId: string, fields: TaskUpdate): Promise<void> {
+    await updateDoc(doc(db, 'tasks', taskId), {
+      ...fields,
+      updatedAt: serverTimestamp(),
+    })
+  }
+
+  async function setArchived(
+    taskId: string,
+    archived: boolean,
+  ): Promise<void> {
+    await updateDoc(doc(db, 'tasks', taskId), {
+      archived,
+      updatedAt: serverTimestamp(),
+    })
+  }
+
+  async function archiveAllDone(): Promise<void> {
+    const doneTasks = tasks.filter((t) => t.done)
+    if (doneTasks.length === 0) return
+    const batch = writeBatch(db)
+    doneTasks.forEach((t) => {
+      batch.update(doc(db, 'tasks', t.id), {
+        archived: true,
+        updatedAt: serverTimestamp(),
+      })
+    })
+    await batch.commit()
+  }
+
+  return {
+    tasks,
+    loading,
+    addTask,
+    toggleDone,
+    deleteTask,
+    updateTask,
+    setArchived,
+    archiveAllDone,
+  }
+}
+
+interface UseArchivedTasksResult {
+  tasks: Task[]
+  loading: boolean
+}
+
+/**
+ * Live subscription to archived tasks of a single board.
+ * Kept separate from `useTasks` so the active list stays lean.
+ */
+export function useArchivedTasks(boardId: string): UseArchivedTasksResult {
+  const [tasks, setTasks] = useState<Task[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!boardId) {
+      setTasks([])
+      setLoading(false)
+      return
+    }
+
+    setLoading(true)
+    const q = query(
+      collection(db, 'tasks'),
+      where('boardId', '==', boardId),
+      where('archived', '==', true),
+      orderBy('createdAt', 'asc'),
+    )
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        const next = snapshot.docs.map(
+          (d) => ({ id: d.id, ...d.data() }) as Task,
+        )
+        setTasks(next)
+        setLoading(false)
+      },
+      (err) => {
+        console.error('useArchivedTasks snapshot error:', err)
+        setLoading(false)
+      },
+    )
+
+    return unsubscribe
+  }, [boardId])
+
+  return { tasks, loading }
 }

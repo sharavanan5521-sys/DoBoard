@@ -1,8 +1,12 @@
 import type { Task } from '../../types'
+import { formatDueDate, PRIORITY_META } from '../../lib/utils'
+import Avatar from '../shared/Avatar'
+import Badge from '../shared/Badge'
 
 interface TaskItemProps {
   task: Task
   accentColor?: string
+  memberName?: (uid: string) => string
   onToggle: (task: Task) => void
   onDelete: (taskId: string) => void
   onClick?: (task: Task) => void
@@ -11,10 +15,15 @@ interface TaskItemProps {
 export default function TaskItem({
   task,
   accentColor = '#6366f1',
+  memberName,
   onToggle,
   onDelete,
   onClick,
 }: TaskItemProps) {
+  const priority = task.priority ? PRIORITY_META[task.priority] : null
+  const due = task.dueDate ? formatDueDate(task.dueDate.toDate()) : null
+  const dueIsOverdue = due?.overdue && !task.done
+
   return (
     <div
       className="group flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-3 py-2.5 shadow-sm transition hover:border-gray-300"
@@ -52,15 +61,40 @@ export default function TaskItem({
         </svg>
       </button>
 
-      <span
-        className={`flex-1 text-sm transition-all duration-200 ${
-          task.done
-            ? 'text-gray-400 line-through opacity-60'
-            : 'text-gray-900'
-        }`}
-      >
-        {task.title}
-      </span>
+      <div className="min-w-0 flex-1">
+        <span
+          className={`block truncate text-sm transition-all duration-200 ${
+            task.done ? 'text-gray-400 line-through opacity-60' : 'text-gray-900'
+          }`}
+        >
+          {task.title}
+        </span>
+        {(priority || due) && (
+          <div className="mt-1 flex flex-wrap items-center gap-1.5">
+            {priority && (
+              <Badge bg={priority.bg} text={priority.text}>
+                {priority.label}
+              </Badge>
+            )}
+            {due && (
+              <Badge
+                bg={dueIsOverdue ? 'bg-red-100' : 'bg-gray-100'}
+                text={dueIsOverdue ? 'text-red-700' : 'text-gray-600'}
+              >
+                {dueIsOverdue ? 'Overdue' : due.text}
+              </Badge>
+            )}
+          </div>
+        )}
+      </div>
+
+      {task.assignee && (
+        <Avatar
+          name={memberName ? memberName(task.assignee) : task.assignee}
+          size="sm"
+          color={accentColor}
+        />
+      )}
 
       <button
         type="button"

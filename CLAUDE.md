@@ -161,7 +161,7 @@ service cloud.firestore {
 | 1 | Auth & User Profile | ✅ Done |
 | 2 | Boards Dashboard | ✅ Done |
 | 3 | Tasks — Core CRUD + Real-time | ✅ Done |
-| 4 | Task Enhancements | ⬜ Todo |
+| 4 | Task Enhancements | ✅ Done |
 | 5 | Collaboration | ⬜ Todo |
 | 6 | Progress Tracker & Insights | ⬜ Todo |
 | 7 | PWA + Polish | ⬜ Todo |
@@ -295,7 +295,7 @@ service cloud.firestore {
 **Goal:** Assignee, due dates, priority, notes, archive — all editable in a slide-in task detail panel.
 
 ### Tasks
-- [ ] Create `src/components/tasks/TaskDetailPanel.tsx` — slides in from right (or bottom on mobile) when a task row is clicked:
+- [x] Create `src/components/tasks/TaskDetailPanel.tsx` — slides in from right (or bottom on mobile) when a task row is clicked:
   - Editable title input
   - Textarea for description/notes
   - Assignee picker: dropdown list of board members (name + avatar)
@@ -303,16 +303,16 @@ service cloud.firestore {
   - Priority selector: three buttons Low (gray) / Medium (amber) / High (red)
   - All changes save to Firestore with `updateDoc` on change (debounced 500ms)
   - Close button (X)
-- [ ] Update `TaskItem.tsx`:
+- [x] Update `TaskItem.tsx`:
   - Show priority badge (Low/Medium/High colored pill) if set
   - Show due date chip — red + "Overdue" if past due and not done
   - Show assignee avatar (small, right-aligned)
   - Click row → open `TaskDetailPanel`
-- [ ] Add archive button in `TaskDetailPanel` (and bulk "Archive all done" button in `BoardDetail` header)
-- [ ] Add "Archived" filter tab to `TaskList`
-- [ ] Archived tasks query: separate hook call with `archived == true`
-- [ ] Update Phase 4 status in this file to ✅ Done
-- [ ] Commit: `git add . && git commit -m "feat: Phase 4 — task enhancements: assignee, due dates, priority, archive"`
+- [x] Add archive button in `TaskDetailPanel` (and bulk "Archive all done" button in `BoardDetail` header)
+- [x] Add "Archived" filter tab to `TaskList`
+- [x] Archived tasks query: separate hook call with `archived == true`
+- [x] Update Phase 4 status in this file to ✅ Done
+- [x] Commit: `git add . && git commit -m "feat: Phase 4 — task enhancements: assignee, due dates, priority, archive"`
 
 ---
 

@@ -1,20 +1,35 @@
+import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useBoard } from '../hooks/useBoards'
-import { useTasks } from '../hooks/useTasks'
+import { useArchivedTasks, useTasks } from '../hooks/useTasks'
 import Avatar from '../components/shared/Avatar'
 import AddTaskInput from '../components/tasks/AddTaskInput'
 import TaskList from '../components/tasks/TaskList'
+import TaskDetailPanel from '../components/tasks/TaskDetailPanel'
 
 export default function BoardDetail() {
   const { boardId = '' } = useParams()
   const navigate = useNavigate()
   const { currentUser } = useAuth()
   const { board, loading: boardLoading } = useBoard(boardId)
-  const { tasks, loading: tasksLoading, addTask, toggleDone, deleteTask } =
-    useTasks(boardId)
+  const {
+    tasks,
+    loading: tasksLoading,
+    addTask,
+    toggleDone,
+    deleteTask,
+    updateTask,
+    setArchived,
+    archiveAllDone,
+  } = useTasks(boardId)
+  const { tasks: archivedTasks, loading: archivedLoading } =
+    useArchivedTasks(boardId)
+
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
 
   const accent = board?.color ?? '#6366f1'
+  const doneCount = tasks.filter((t) => t.done).length
 
   function memberName(uid: string): string {
     if (currentUser && uid === currentUser.uid) {
@@ -22,6 +37,14 @@ export default function BoardDetail() {
     }
     return uid
   }
+
+  // Derive the live task object for the open panel from the latest snapshots.
+  const selectedTask =
+    selectedTaskId !== null
+      ? (tasks.find((t) => t.id === selectedTaskId) ??
+        archivedTasks.find((t) => t.id === selectedTaskId) ??
+        null)
+      : null
 
   if (!boardLoading && !board) {
     return (
@@ -61,7 +84,7 @@ export default function BoardDetail() {
           Dashboard
         </button>
 
-        <div className="mt-3 flex items-center justify-between">
+        <div className="mt-3 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <span
               className="h-4 w-4 shrink-0 rounded-full"
@@ -72,18 +95,29 @@ export default function BoardDetail() {
             </h1>
           </div>
 
-          {board && (
-            <div className="flex -space-x-2">
-              {board.members.map((uid) => (
-                <Avatar
-                  key={uid}
-                  name={memberName(uid)}
-                  size="sm"
-                  color={accent}
-                />
-              ))}
-            </div>
-          )}
+          <div className="flex items-center gap-4">
+            {doneCount > 0 && (
+              <button
+                type="button"
+                onClick={() => archiveAllDone()}
+                className="hidden rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 sm:inline-block"
+              >
+                Archive all done ({doneCount})
+              </button>
+            )}
+            {board && (
+              <div className="flex -space-x-2">
+                {board.members.map((uid) => (
+                  <Avatar
+                    key={uid}
+                    name={memberName(uid)}
+                    size="sm"
+                    color={accent}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
@@ -93,12 +127,28 @@ export default function BoardDetail() {
           <TaskList
             tasks={tasks}
             loading={tasksLoading}
+            archivedTasks={archivedTasks}
+            archivedLoading={archivedLoading}
             accentColor={accent}
+            memberName={memberName}
             onToggle={toggleDone}
             onDelete={deleteTask}
+            onTaskClick={(task) => setSelectedTaskId(task.id)}
           />
         </div>
       </main>
+
+      {selectedTask && (
+        <TaskDetailPanel
+          task={selectedTask}
+          members={board?.members ?? []}
+          memberName={memberName}
+          accentColor={accent}
+          onClose={() => setSelectedTaskId(null)}
+          onUpdate={updateTask}
+          onSetArchived={setArchived}
+        />
+      )}
     </div>
   )
 }
