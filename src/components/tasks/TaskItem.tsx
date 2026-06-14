@@ -69,6 +69,15 @@ export default function TaskItem({
         >
           {task.title}
         </span>
+        {task.description && (
+          <p
+            className={`mt-0.5 truncate text-xs ${
+              task.done ? 'text-gray-300' : 'text-gray-500'
+            }`}
+          >
+            {task.description}
+          </p>
+        )}
         {(priority || due) && (
           <div className="mt-1 flex flex-wrap items-center gap-1.5">
             {priority && (
