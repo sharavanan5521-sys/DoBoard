@@ -166,7 +166,7 @@ service cloud.firestore {
 | 3 | Tasks — Core CRUD + Real-time | ✅ Done |
 | 4 | Task Enhancements | ✅ Done |
 | 5 | Collaboration | ✅ Done |
-| 6 | Progress Tracker & Insights | ⬜ Todo |
+| 6 | Progress Tracker & Insights | ✅ Done |
 | 7 | PWA + Polish | ⬜ Todo |
 
 ---
@@ -359,35 +359,35 @@ service cloud.firestore {
 **Goal:** Per-board insights tab with charts, stats, and a health summary.
 
 ### Tasks
-- [ ] Add "Insights" tab to `BoardDetail.tsx` filter bar (next to All/Active/Done/Archived)
-- [ ] Create `src/components/insights/InsightsPanel.tsx`
-- [ ] Stat cards row (4 cards):
+- [x] Add "Insights" tab to `BoardDetail.tsx` filter bar (next to All/Active/Done/Archived)
+- [x] Create `src/components/insights/InsightsPanel.tsx`
+- [x] Stat cards row (4 cards):
   - Total tasks
   - Done (count + %)
   - Active (not done, not archived)
   - Overdue (due < now, not done)
-- [ ] Completion rate donut chart (Recharts `PieChart`):
+- [x] Completion rate donut chart (Recharts `PieChart`):
   - Done (board color) vs Remaining (gray)
   - Center label: "X% done"
-- [ ] Tasks completed over last 7 days (Recharts `BarChart` or `LineChart`):
+- [x] Tasks completed over last 7 days (Recharts `BarChart` or `LineChart`):
   - X axis: last 7 days (Mon, Tue... formatted with `date-fns format(day, 'EEE')`)
   - Y axis: count of tasks where `doneAt` falls on that day
   - Bar color: board color
-- [ ] Priority breakdown (Recharts `BarChart`, horizontal):
+- [x] Priority breakdown (Recharts `BarChart`, horizontal):
   - Three bars: High / Medium / Low
   - Colors: red / amber / gray
   - Label: count on each bar
-- [ ] Member contribution (Recharts `BarChart`):
+- [x] Member contribution (Recharts `BarChart`):
   - X axis: member names (initials or first name)
   - Y axis: tasks completed by that member (where `done == true` and `createdBy` or `assignee == uid`)
-- [ ] Board health summary text block at top of InsightsPanel:
+- [x] Board health summary text block at top of InsightsPanel:
   - If 0 overdue: "All on track"
   - If overdue > 0: "X tasks are overdue"
   - If completion > 80%: "Great progress on this board!"
   - If all done: "Board complete!"
-- [ ] Verify all charts render correctly with real data
-- [ ] Update Phase 6 status in this file to ✅ Done
-- [ ] Commit: `git add . && git commit -m "feat: Phase 6 — progress tracker and insights with charts"`
+- [x] Verify all charts render correctly with real data
+- [x] Update Phase 6 status in this file to ✅ Done
+- [x] Commit: `git add . && git commit -m "feat: Phase 6 — progress tracker and insights with charts"`
 
 ---
 
@@ -444,3 +444,5 @@ _Add notes as the project evolves._
 - **Phase 5:** The `boards` update rule was widened so a signed-in user can self-join via an invite link (they aren't a member yet when joining). Apply the updated rules block above in the Firebase console.
 - **Phase 5:** Email invites match on a lowercased `email` field; `AuthContext` now stores email lowercased. Existing user docs created before this change may need their email normalized for lookup to find them.
 - Presence uses `presence/{uid}_{boardId}` docs; `usePresence` queries by `boardId` (single field, no composite index needed) and treats `lastSeen` within 60s as online.
+- **Phase 6:** Firestore rules and composite indexes are now managed in-repo (`firestore.rules`, `firestore.indexes.json`, `firebase.json`, `.firebaserc`) and were deployed to `doboard-7e6ba` via `firebase deploy --only firestore:rules,firestore:indexes`. The widened self-join board rule is live. Indexes: `boards(members array-contains, updatedAt desc)` and `tasks(boardId asc, archived asc, createdAt asc)`.
+- **Phase 6:** Insights compute from the active (non-archived) task list, so archiving done tasks removes them from the stat cards and charts. Member contribution attributes each completed task to its `assignee`, falling back to `createdBy`.

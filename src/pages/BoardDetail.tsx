@@ -7,10 +7,13 @@ import { useMembers } from '../hooks/useMembers'
 import { usePresence } from '../hooks/usePresence'
 import Avatar from '../components/shared/Avatar'
 import AddTaskInput from '../components/tasks/AddTaskInput'
-import TaskList from '../components/tasks/TaskList'
+import TaskList, { type TaskFilter } from '../components/tasks/TaskList'
 import TaskDetailPanel from '../components/tasks/TaskDetailPanel'
 import InviteModal from '../components/boards/InviteModal'
 import MembersModal from '../components/boards/MembersModal'
+import InsightsPanel from '../components/insights/InsightsPanel'
+
+type View = TaskFilter | 'insights'
 
 export default function BoardDetail() {
   const { boardId = '' } = useParams()
@@ -35,10 +38,19 @@ export default function BoardDetail() {
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
   const [showInvite, setShowInvite] = useState(false)
   const [showMembers, setShowMembers] = useState(false)
+  const [view, setView] = useState<View>('all')
 
   const accent = board?.color ?? '#6366f1'
   const doneCount = tasks.filter((t) => t.done).length
   const online = new Set(onlineUserIds)
+
+  const tabs: { key: View; label: string; count?: number }[] = [
+    { key: 'all', label: 'All', count: tasks.length },
+    { key: 'active', label: 'Active', count: tasks.filter((t) => !t.done).length },
+    { key: 'done', label: 'Done', count: doneCount },
+    { key: 'archived', label: 'Archived', count: archivedTasks.length },
+    { key: 'insights', label: 'Insights' },
+  ]
 
   function memberName(uid: string): string {
     if (currentUser && uid === currentUser.uid) {
@@ -149,20 +161,66 @@ export default function BoardDetail() {
         </div>
       </header>
 
-      <main className="mx-auto max-w-2xl px-6 py-8">
-        <AddTaskInput onAdd={addTask} accentColor={accent} />
-        <div className="mt-6">
-          <TaskList
-            tasks={tasks}
-            loading={tasksLoading}
-            archivedTasks={archivedTasks}
-            archivedLoading={archivedLoading}
-            accentColor={accent}
-            memberName={memberName}
-            onToggle={toggleDone}
-            onDelete={deleteTask}
-            onTaskClick={(task) => setSelectedTaskId(task.id)}
-          />
+      <main
+        className={`mx-auto px-6 py-8 ${
+          view === 'insights' ? 'max-w-4xl' : 'max-w-2xl'
+        }`}
+      >
+        {view !== 'insights' && (
+          <AddTaskInput onAdd={addTask} accentColor={accent} />
+        )}
+
+        {/* Tab bar */}
+        <div className="mt-6 flex gap-1 overflow-x-auto rounded-lg bg-gray-100 p-1">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => setView(tab.key)}
+              className={`flex flex-1 items-center justify-center gap-2 whitespace-nowrap rounded-md px-3 py-1.5 text-sm font-medium transition ${
+                view === tab.key
+                  ? 'bg-white text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-700'
+              }`}
+            >
+              {tab.label}
+              {tab.count !== undefined && (
+                <span
+                  className={`rounded-full px-1.5 text-xs ${
+                    view === tab.key
+                      ? 'bg-gray-100 text-gray-600'
+                      : 'bg-gray-200 text-gray-500'
+                  }`}
+                >
+                  {tab.count}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-4">
+          {view === 'insights' ? (
+            <InsightsPanel
+              tasks={tasks}
+              members={board?.members ?? []}
+              memberName={memberName}
+              accentColor={accent}
+            />
+          ) : (
+            <TaskList
+              filter={view}
+              tasks={tasks}
+              loading={tasksLoading}
+              archivedTasks={archivedTasks}
+              archivedLoading={archivedLoading}
+              accentColor={accent}
+              memberName={memberName}
+              onToggle={toggleDone}
+              onDelete={deleteTask}
+              onTaskClick={(task) => setSelectedTaskId(task.id)}
+            />
+          )}
         </div>
       </main>
 
