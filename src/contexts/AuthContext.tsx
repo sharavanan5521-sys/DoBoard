@@ -37,7 +37,7 @@ async function ensureUserDoc(user: FirebaseUser): Promise<void> {
     {
       uid: user.uid,
       name: user.displayName ?? user.email ?? 'Anonymous',
-      email: user.email ?? '',
+      email: (user.email ?? '').toLowerCase(),
       avatarUrl: user.photoURL ?? null,
       createdAt: serverTimestamp(),
     },

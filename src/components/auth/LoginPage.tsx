@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 
 function GoogleLogo() {
@@ -52,11 +52,15 @@ function Spinner() {
 
 export default function LoginPage() {
   const { currentUser, loading, signInWithGoogle } = useAuth()
+  const location = useLocation()
   const [signingIn, setSigningIn] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const from =
+    (location.state as { from?: string } | null)?.from ?? '/'
+
   if (!loading && currentUser) {
-    return <Navigate to="/" replace />
+    return <Navigate to={from} replace />
   }
 
   async function handleSignIn() {

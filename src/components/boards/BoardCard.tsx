@@ -2,6 +2,8 @@ import { useNavigate } from 'react-router-dom'
 import type { Board } from '../../types'
 import { useAuth } from '../../contexts/AuthContext'
 import { useTaskCounts } from '../../hooks/useTasks'
+import { useMembers } from '../../hooks/useMembers'
+import { usePresence } from '../../hooks/usePresence'
 import Avatar from '../shared/Avatar'
 import ProgressBar from '../shared/ProgressBar'
 
@@ -13,16 +15,19 @@ export default function BoardCard({ board }: BoardCardProps) {
   const navigate = useNavigate()
   const { currentUser } = useAuth()
   const { total, done } = useTaskCounts(board.id)
+  const { members } = useMembers(board.members)
+  const onlineUserIds = usePresence(board.id, { heartbeat: false })
 
   const percent = total > 0 ? Math.round((done / total) * 100) : 0
   const visibleMembers = board.members.slice(0, 3)
   const extraMembers = board.members.length - visibleMembers.length
+  const onlineCount = onlineUserIds.length
 
   function memberName(uid: string): string {
     if (currentUser && uid === currentUser.uid) {
       return currentUser.displayName ?? currentUser.email ?? 'You'
     }
-    return uid
+    return members[uid]?.name ?? uid
   }
 
   return (
@@ -39,6 +44,12 @@ export default function BoardCard({ board }: BoardCardProps) {
         <h3 className="truncate text-base font-semibold text-gray-900">
           {board.name}
         </h3>
+        {onlineCount > 0 && (
+          <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700">
+            <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
+            {onlineCount} online
+          </span>
+        )}
       </div>
 
       <p className="mt-3 text-sm text-gray-500">
@@ -51,7 +62,13 @@ export default function BoardCard({ board }: BoardCardProps) {
       <div className="mt-4 flex items-center">
         <div className="flex -space-x-2">
           {visibleMembers.map((uid) => (
-            <Avatar key={uid} name={memberName(uid)} size="sm" color={board.color} />
+            <Avatar
+              key={uid}
+              name={memberName(uid)}
+              size="sm"
+              color={board.color}
+              online={onlineUserIds.includes(uid)}
+            />
           ))}
         </div>
         {extraMembers > 0 && (

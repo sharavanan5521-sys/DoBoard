@@ -134,8 +134,11 @@ service cloud.firestore {
       allow read: if request.auth != null
         && request.auth.uid in resource.data.members;
       allow create: if request.auth != null;
+      // Allow current members to update, and allow a signed-in user to add
+      // themselves via an invite link (self-join through arrayUnion).
       allow update: if request.auth != null
-        && request.auth.uid in resource.data.members;
+        && (request.auth.uid in resource.data.members
+            || request.auth.uid in request.resource.data.members);
       allow delete: if request.auth != null
         && request.auth.uid == resource.data.createdBy;
     }
@@ -162,7 +165,7 @@ service cloud.firestore {
 | 2 | Boards Dashboard | ✅ Done |
 | 3 | Tasks — Core CRUD + Real-time | ✅ Done |
 | 4 | Task Enhancements | ✅ Done |
-| 5 | Collaboration | ⬜ Todo |
+| 5 | Collaboration | ✅ Done |
 | 6 | Progress Tracker & Insights | ⬜ Todo |
 | 7 | PWA + Polish | ⬜ Todo |
 
@@ -321,33 +324,33 @@ service cloud.firestore {
 **Goal:** Invite members by link or email, online presence, member management.
 
 ### Tasks
-- [ ] Create `src/hooks/usePresence.ts`:
+- [x] Create `src/hooks/usePresence.ts`:
   - On BoardDetail mount: write `presence/{uid}_{boardId}` with `lastSeen: serverTimestamp()` every 30s using `setInterval`
   - Clean up interval on unmount
   - Listen to all presence docs for current board's members
   - Return `onlineUserIds: string[]` (lastSeen within 60 seconds)
-- [ ] Update `BoardCard.tsx`: show "X online" green badge if `onlineUserIds.length > 0`
-- [ ] Update `BoardDetail.tsx` header: show member avatars with green dot overlay for online users
-- [ ] Invite by link:
+- [x] Update `BoardCard.tsx`: show "X online" green badge if `onlineUserIds.length > 0`
+- [x] Update `BoardDetail.tsx` header: show member avatars with green dot overlay for online users
+- [x] Invite by link:
   - "Invite" button in BoardDetail header → opens invite modal
   - Generate shareable URL: `${window.location.origin}/join/${boardId}`
   - "Copy link" button (uses `navigator.clipboard.writeText`)
   - Toast: "Link copied!"
-- [ ] Join board page (`/join/:boardId`):
+- [x] Join board page (`/join/:boardId`):
   - If not logged in → redirect to login, then return here
   - If already a member → redirect to `/board/:boardId`
   - If new → show "You've been invited to [Board Name]" with "Join Board" button
   - On join: `arrayUnion(currentUser.uid)` on board's `members` field
-- [ ] Invite by email:
+- [x] Invite by email:
   - In invite modal: email input → search `users` collection by email
   - If found: add their uid to `members[]` with `arrayUnion`
   - If not found: show "User not found — they need to sign in first"
-- [ ] Member management (in board settings modal):
+- [x] Member management (in board settings modal):
   - List all members (name + avatar + "online" badge)
   - Board creator can remove members (`arrayRemove`)
   - Leave board option for non-creators
-- [ ] Update Phase 5 status in this file to ✅ Done
-- [ ] Commit: `git add . && git commit -m "feat: Phase 5 — collaboration: invite, presence, member management"`
+- [x] Update Phase 5 status in this file to ✅ Done
+- [x] Commit: `git add . && git commit -m "feat: Phase 5 — collaboration: invite, presence, member management"`
 
 ---
 
@@ -438,3 +441,6 @@ _Add notes as the project evolves._
 - Task query uses `boardId` field — add a Firestore composite index on `(boardId, archived, createdAt)` if Firestore prompts for it
 - Presence cleanup: docs are small, no need to delete on logout — TTL of 60s handles it
 - Member contribution chart uses `assignee` field if set, otherwise `createdBy`
+- **Phase 5:** The `boards` update rule was widened so a signed-in user can self-join via an invite link (they aren't a member yet when joining). Apply the updated rules block above in the Firebase console.
+- **Phase 5:** Email invites match on a lowercased `email` field; `AuthContext` now stores email lowercased. Existing user docs created before this change may need their email normalized for lookup to find them.
+- Presence uses `presence/{uid}_{boardId}` docs; `usePresence` queries by `boardId` (single field, no composite index needed) and treats `lastSeen` within 60s as online.

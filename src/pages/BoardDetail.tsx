@@ -3,10 +3,14 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useBoard } from '../hooks/useBoards'
 import { useArchivedTasks, useTasks } from '../hooks/useTasks'
+import { useMembers } from '../hooks/useMembers'
+import { usePresence } from '../hooks/usePresence'
 import Avatar from '../components/shared/Avatar'
 import AddTaskInput from '../components/tasks/AddTaskInput'
 import TaskList from '../components/tasks/TaskList'
 import TaskDetailPanel from '../components/tasks/TaskDetailPanel'
+import InviteModal from '../components/boards/InviteModal'
+import MembersModal from '../components/boards/MembersModal'
 
 export default function BoardDetail() {
   const { boardId = '' } = useParams()
@@ -25,17 +29,22 @@ export default function BoardDetail() {
   } = useTasks(boardId)
   const { tasks: archivedTasks, loading: archivedLoading } =
     useArchivedTasks(boardId)
+  const { members } = useMembers(board?.members ?? [])
+  const onlineUserIds = usePresence(boardId)
 
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null)
+  const [showInvite, setShowInvite] = useState(false)
+  const [showMembers, setShowMembers] = useState(false)
 
   const accent = board?.color ?? '#6366f1'
   const doneCount = tasks.filter((t) => t.done).length
+  const online = new Set(onlineUserIds)
 
   function memberName(uid: string): string {
     if (currentUser && uid === currentUser.uid) {
       return currentUser.displayName ?? currentUser.email ?? 'You'
     }
-    return uid
+    return members[uid]?.name ?? uid
   }
 
   // Derive the live task object for the open panel from the latest snapshots.
@@ -95,7 +104,7 @@ export default function BoardDetail() {
             </h1>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {doneCount > 0 && (
               <button
                 type="button"
@@ -105,17 +114,36 @@ export default function BoardDetail() {
                 Archive all done ({doneCount})
               </button>
             )}
+            <button
+              type="button"
+              onClick={() => setShowInvite(true)}
+              className="rounded-lg px-3 py-1.5 text-sm font-medium text-white transition hover:opacity-90"
+              style={{ backgroundColor: accent }}
+            >
+              Invite
+            </button>
             {board && (
-              <div className="flex -space-x-2">
-                {board.members.map((uid) => (
+              <button
+                type="button"
+                onClick={() => setShowMembers(true)}
+                className="flex -space-x-2 rounded-full transition hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                aria-label="Manage members"
+              >
+                {board.members.slice(0, 4).map((uid) => (
                   <Avatar
                     key={uid}
                     name={memberName(uid)}
                     size="sm"
                     color={accent}
+                    online={online.has(uid)}
                   />
                 ))}
-              </div>
+                {board.members.length > 4 && (
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-200 text-[10px] font-medium text-gray-600 ring-2 ring-white">
+                    +{board.members.length - 4}
+                  </span>
+                )}
+              </button>
             )}
           </div>
         </div>
@@ -147,6 +175,23 @@ export default function BoardDetail() {
           onClose={() => setSelectedTaskId(null)}
           onUpdate={updateTask}
           onSetArchived={setArchived}
+        />
+      )}
+
+      {showInvite && board && (
+        <InviteModal
+          boardId={board.id}
+          boardName={board.name}
+          members={board.members}
+          onClose={() => setShowInvite(false)}
+        />
+      )}
+
+      {showMembers && board && (
+        <MembersModal
+          board={board}
+          onlineUserIds={onlineUserIds}
+          onClose={() => setShowMembers(false)}
         />
       )}
     </div>
