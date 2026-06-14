@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import {
   addDoc,
   collection,
+  doc,
   onSnapshot,
   orderBy,
   query,
@@ -69,4 +70,45 @@ export function useBoards(): UseBoardsResult {
   }
 
   return { boards, loading, createBoard }
+}
+
+interface UseBoardResult {
+  board: Board | null
+  loading: boolean
+}
+
+/** Live subscription to a single board document. */
+export function useBoard(boardId: string): UseBoardResult {
+  const [board, setBoard] = useState<Board | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!boardId) {
+      setBoard(null)
+      setLoading(false)
+      return
+    }
+
+    setLoading(true)
+    const unsubscribe = onSnapshot(
+      doc(db, 'boards', boardId),
+      (snapshot) => {
+        setBoard(
+          snapshot.exists()
+            ? ({ id: snapshot.id, ...snapshot.data() } as Board)
+            : null,
+        )
+        setLoading(false)
+      },
+      (err) => {
+        console.error('useBoard snapshot error:', err)
+        setBoard(null)
+        setLoading(false)
+      },
+    )
+
+    return unsubscribe
+  }, [boardId])
+
+  return { board, loading }
 }

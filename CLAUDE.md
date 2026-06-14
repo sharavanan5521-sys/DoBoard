@@ -160,7 +160,7 @@ service cloud.firestore {
 | 0 | Setup & Foundation | ✅ Done |
 | 1 | Auth & User Profile | ✅ Done |
 | 2 | Boards Dashboard | ✅ Done |
-| 3 | Tasks — Core CRUD + Real-time | ⬜ Todo |
+| 3 | Tasks — Core CRUD + Real-time | ✅ Done |
 | 4 | Task Enhancements | ⬜ Todo |
 | 5 | Collaboration | ⬜ Todo |
 | 6 | Progress Tracker & Insights | ⬜ Todo |
@@ -259,34 +259,34 @@ service cloud.firestore {
 **Goal:** Full task list with live onSnapshot updates, add/complete/delete, filter tabs.
 
 ### Tasks
-- [ ] Upgrade `src/hooks/useTasks.ts` to full version:
+- [x] Upgrade `src/hooks/useTasks.ts` to full version:
   - `onSnapshot` on tasks where `boardId == id` and `archived == false`
   - Sorted by `createdAt` ascending
   - Returns `{ tasks, loading, addTask, toggleDone, deleteTask }`
-- [ ] Create `src/components/tasks/AddTaskInput.tsx`:
+- [x] Create `src/components/tasks/AddTaskInput.tsx`:
   - Text input at top of list
   - Press Enter or click "Add" button to create task
   - Clear input after adding
   - Focus on load
-- [ ] Create `src/components/tasks/TaskItem.tsx`:
+- [x] Create `src/components/tasks/TaskItem.tsx`:
   - Animated checkbox — on check, title gets strikethrough + opacity fade
   - Task title text
   - Delete button (trash icon, visible on hover)
   - Clicking the row will later open TaskDetailPanel (stub for now)
-- [ ] Create `src/components/tasks/TaskList.tsx`:
+- [x] Create `src/components/tasks/TaskList.tsx`:
   - Filter tabs: All / Active / Done — show count badge on each
   - Renders filtered `TaskItem` list
   - Empty state per filter ("No tasks yet", "Nothing active", "Nothing done yet")
-- [ ] Build `BoardDetail.tsx` full layout:
+- [x] Build `BoardDetail.tsx` full layout:
   - Back button (→ Dashboard)
   - Board name as page title
   - Board color accent
   - Member avatars row (header area)
   - `AddTaskInput` at top
   - `TaskList` below
-- [ ] Verify: add tasks, check them off, see live updates (open in two tabs to test real-time)
-- [ ] Update Phase 3 status in this file to ✅ Done
-- [ ] Commit: `git add . && git commit -m "feat: Phase 3 — tasks CRUD with real-time onSnapshot"`
+- [x] Verify: add tasks, check them off, see live updates (open in two tabs to test real-time)
+- [x] Update Phase 3 status in this file to ✅ Done
+- [x] Commit: `git add . && git commit -m "feat: Phase 3 — tasks CRUD with real-time onSnapshot"`
 
 ---
 
