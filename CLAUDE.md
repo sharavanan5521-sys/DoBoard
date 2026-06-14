@@ -159,7 +159,7 @@ service cloud.firestore {
 |---|---|---|
 | 0 | Setup & Foundation | ✅ Done |
 | 1 | Auth & User Profile | ✅ Done |
-| 2 | Boards Dashboard | ⬜ Todo |
+| 2 | Boards Dashboard | ✅ Done |
 | 3 | Tasks — Core CRUD + Real-time | ⬜ Todo |
 | 4 | Task Enhancements | ⬜ Todo |
 | 5 | Collaboration | ⬜ Todo |
@@ -223,34 +223,34 @@ service cloud.firestore {
 **Goal:** Full board CRUD, responsive card grid, color picker, member avatars, progress bar on card.
 
 ### Tasks
-- [ ] Create `src/hooks/useBoards.ts`:
+- [x] Create `src/hooks/useBoards.ts`:
   - `onSnapshot` query on `boards` where `members array-contains currentUser.uid`
   - Returns `{ boards, loading }`
-- [ ] Create `src/hooks/useTasks.ts` (basic version — count only):
+- [x] Create `src/hooks/useTasks.ts` (basic version — count only):
   - For each boardId, query tasks where `boardId == id` and `archived == false`
   - Returns task counts per board (total and done) — used for progress bars on cards
-- [ ] Create `src/components/shared/ProgressBar.tsx` — props: `value` (0–100), `color` (hex)
-- [ ] Create `src/components/shared/Avatar.tsx` — shows initials circle, props: `name`, `size`, `color`, optional `online` (green dot)
-- [ ] Create `src/components/boards/BoardCard.tsx`:
+- [x] Create `src/components/shared/ProgressBar.tsx` — props: `value` (0–100), `color` (hex)
+- [x] Create `src/components/shared/Avatar.tsx` — shows initials circle, props: `name`, `size`, `color`, optional `online` (green dot)
+- [x] Create `src/components/boards/BoardCard.tsx`:
   - Color dot + board name
   - "X of Y done" text
   - `ProgressBar` component
   - Stacked member avatars (max 3 shown, then "+N")
   - Click navigates to `/board/:boardId`
   - Hover: subtle lift effect
-- [ ] Create `src/components/boards/CreateBoardModal.tsx`:
+- [x] Create `src/components/boards/CreateBoardModal.tsx`:
   - Text input for board name
   - 8 preset color swatches to pick from
   - Create button → adds board to Firestore with `members: [currentUser.uid]`
   - Cancel/close
-- [ ] Build `Dashboard.tsx` full layout:
+- [x] Build `Dashboard.tsx` full layout:
   - Header: "DoBoard" logo, "+ New Board" button (opens modal), user avatar + sign out
   - Responsive 2-col card grid (1-col on mobile)
   - Empty state: "No boards yet — create one to get started"
   - Loading skeleton (3 gray card placeholders while loading)
-- [ ] Verify: can create board, see it on dashboard with progress bar, click to navigate
-- [ ] Update Phase 2 status in this file to ✅ Done
-- [ ] Commit: `git add . && git commit -m "feat: Phase 2 — boards dashboard with CRUD"`
+- [x] Verify: can create board, see it on dashboard with progress bar, click to navigate
+- [x] Update Phase 2 status in this file to ✅ Done
+- [x] Commit: `git add . && git commit -m "feat: Phase 2 — boards dashboard with CRUD"`
 
 ---
 
