@@ -2,6 +2,7 @@ import {
   arrayRemove,
   arrayUnion,
   collection,
+  deleteDoc,
   doc,
   getDocs,
   limit,
@@ -9,6 +10,7 @@ import {
   serverTimestamp,
   updateDoc,
   where,
+  writeBatch,
 } from 'firebase/firestore'
 import { db } from './firebase'
 
@@ -29,6 +31,25 @@ export async function removeMember(
     members: arrayRemove(uid),
     updatedAt: serverTimestamp(),
   })
+}
+
+/**
+ * Deletes a board and all of its tasks.
+ * Tasks are removed in batches of 450 to stay under the 500-op batch limit.
+ */
+export async function deleteBoard(boardId: string): Promise<void> {
+  const taskSnap = await getDocs(
+    query(collection(db, 'tasks'), where('boardId', '==', boardId)),
+  )
+
+  const docs = taskSnap.docs
+  for (let i = 0; i < docs.length; i += 450) {
+    const batch = writeBatch(db)
+    docs.slice(i, i + 450).forEach((d) => batch.delete(d.ref))
+    await batch.commit()
+  }
+
+  await deleteDoc(doc(db, 'boards', boardId))
 }
 
 export type InviteResult =

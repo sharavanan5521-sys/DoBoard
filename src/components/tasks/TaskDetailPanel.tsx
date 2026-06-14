@@ -220,7 +220,7 @@ export default function TaskDetailPanel({
         </div>
 
         {/* Archive */}
-        <div className="mt-auto border-t border-gray-200 px-5 py-4">
+        <div className="mt-auto border-t border-gray-200 px-5 py-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
           <button
             type="button"
             onClick={handleArchiveToggle}

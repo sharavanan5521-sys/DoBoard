@@ -12,6 +12,7 @@ import {
   where,
   writeBatch,
 } from 'firebase/firestore'
+import toast from 'react-hot-toast'
 import { db } from '../lib/firebase'
 import { useAuth } from '../contexts/AuthContext'
 import type { Task } from '../types'
@@ -127,33 +128,51 @@ export function useTasks(boardId: string): UseTasksResult {
   async function addTask(title: string): Promise<void> {
     const trimmed = title.trim()
     if (!trimmed || !currentUser) return
-    await addDoc(collection(db, 'tasks'), {
-      boardId,
-      title: trimmed,
-      description: null,
-      done: false,
-      doneAt: null,
-      assignee: null,
-      priority: null,
-      dueDate: null,
-      archived: false,
-      createdBy: currentUser.uid,
-      createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp(),
-    })
+    try {
+      await addDoc(collection(db, 'tasks'), {
+        boardId,
+        title: trimmed,
+        description: null,
+        done: false,
+        doneAt: null,
+        assignee: null,
+        priority: null,
+        dueDate: null,
+        archived: false,
+        createdBy: currentUser.uid,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      })
+      toast.success('Task added')
+    } catch (err) {
+      console.error('addTask failed:', err)
+      toast.error('Could not add task')
+      throw err
+    }
   }
 
   async function toggleDone(task: Task): Promise<void> {
     const nextDone = !task.done
-    await updateDoc(doc(db, 'tasks', task.id), {
-      done: nextDone,
-      doneAt: nextDone ? serverTimestamp() : null,
-      updatedAt: serverTimestamp(),
-    })
+    try {
+      await updateDoc(doc(db, 'tasks', task.id), {
+        done: nextDone,
+        doneAt: nextDone ? serverTimestamp() : null,
+        updatedAt: serverTimestamp(),
+      })
+    } catch (err) {
+      console.error('toggleDone failed:', err)
+      toast.error('Could not update task')
+    }
   }
 
   async function deleteTask(taskId: string): Promise<void> {
-    await deleteDoc(doc(db, 'tasks', taskId))
+    try {
+      await deleteDoc(doc(db, 'tasks', taskId))
+      toast.success('Task deleted')
+    } catch (err) {
+      console.error('deleteTask failed:', err)
+      toast.error('Could not delete task')
+    }
   }
 
   async function updateTask(taskId: string, fields: TaskUpdate): Promise<void> {
@@ -167,23 +186,35 @@ export function useTasks(boardId: string): UseTasksResult {
     taskId: string,
     archived: boolean,
   ): Promise<void> {
-    await updateDoc(doc(db, 'tasks', taskId), {
-      archived,
-      updatedAt: serverTimestamp(),
-    })
+    try {
+      await updateDoc(doc(db, 'tasks', taskId), {
+        archived,
+        updatedAt: serverTimestamp(),
+      })
+      toast.success(archived ? 'Task archived' : 'Task restored')
+    } catch (err) {
+      console.error('setArchived failed:', err)
+      toast.error('Could not update task')
+    }
   }
 
   async function archiveAllDone(): Promise<void> {
     const doneTasks = tasks.filter((t) => t.done)
     if (doneTasks.length === 0) return
-    const batch = writeBatch(db)
-    doneTasks.forEach((t) => {
-      batch.update(doc(db, 'tasks', t.id), {
-        archived: true,
-        updatedAt: serverTimestamp(),
+    try {
+      const batch = writeBatch(db)
+      doneTasks.forEach((t) => {
+        batch.update(doc(db, 'tasks', t.id), {
+          archived: true,
+          updatedAt: serverTimestamp(),
+        })
       })
-    })
-    await batch.commit()
+      await batch.commit()
+      toast.success(`Archived ${doneTasks.length} done`)
+    } catch (err) {
+      console.error('archiveAllDone failed:', err)
+      toast.error('Could not archive tasks')
+    }
   }
 
   return {

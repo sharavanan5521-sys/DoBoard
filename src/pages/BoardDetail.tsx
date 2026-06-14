@@ -86,12 +86,12 @@ export default function BoardDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="border-b border-gray-200 bg-white px-6 py-4">
+    <div className="min-h-screen bg-gray-50 pb-[env(safe-area-inset-bottom)]">
+      <header className="border-b border-gray-200 bg-white px-4 py-3 sm:px-6 sm:py-4">
         <button
           type="button"
           onClick={() => navigate('/')}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-500 transition hover:text-gray-800"
+          className="inline-flex min-h-[44px] items-center gap-1.5 text-sm font-medium text-gray-500 transition hover:text-gray-800"
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
             <path
@@ -116,12 +116,12 @@ export default function BoardDetail() {
             </h1>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             {doneCount > 0 && (
               <button
                 type="button"
                 onClick={() => archiveAllDone()}
-                className="hidden rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50 sm:inline-block"
+                className="hidden min-h-[44px] rounded-lg border border-gray-300 px-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50 sm:inline-flex sm:items-center"
               >
                 Archive all done ({doneCount})
               </button>
@@ -129,7 +129,7 @@ export default function BoardDetail() {
             <button
               type="button"
               onClick={() => setShowInvite(true)}
-              className="rounded-lg px-3 py-1.5 text-sm font-medium text-white transition hover:opacity-90"
+              className="flex min-h-[44px] items-center rounded-lg px-3 text-sm font-medium text-white transition hover:opacity-90"
               style={{ backgroundColor: accent }}
             >
               Invite
@@ -162,7 +162,7 @@ export default function BoardDetail() {
       </header>
 
       <main
-        className={`mx-auto px-6 py-8 ${
+        className={`mx-auto px-4 py-6 sm:px-6 sm:py-8 ${
           view === 'insights' ? 'max-w-4xl' : 'max-w-2xl'
         }`}
       >

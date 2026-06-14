@@ -102,7 +102,7 @@ export default function TaskItem({
           e.stopPropagation()
           onDelete(task.id)
         }}
-        className="shrink-0 rounded-lg p-1.5 text-gray-300 opacity-0 transition hover:bg-red-50 hover:text-red-500 group-hover:opacity-100"
+        className="shrink-0 rounded-lg p-2 text-gray-300 opacity-100 transition hover:bg-red-50 hover:text-red-500 sm:opacity-0 sm:group-hover:opacity-100"
         aria-label="Delete task"
       >
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none">

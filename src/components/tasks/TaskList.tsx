@@ -1,5 +1,6 @@
 import type { Task } from '../../types'
 import TaskItem from './TaskItem'
+import { RowSkeleton } from '../shared/Skeleton'
 
 export type TaskFilter = 'all' | 'active' | 'done' | 'archived'
 
@@ -21,15 +22,6 @@ const EMPTY_TEXT: Record<TaskFilter, string> = {
   active: 'Nothing active',
   done: 'Nothing done yet',
   archived: 'Nothing archived',
-}
-
-function RowSkeleton() {
-  return (
-    <div className="flex animate-pulse items-center gap-3 rounded-xl border border-gray-200 bg-white px-3 py-2.5">
-      <div className="h-5 w-5 rounded-full bg-gray-200" />
-      <div className="h-4 w-2/3 rounded bg-gray-200" />
-    </div>
-  )
 }
 
 export default function TaskList({

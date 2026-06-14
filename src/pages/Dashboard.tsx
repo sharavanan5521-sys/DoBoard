@@ -1,26 +1,11 @@
 import { useState } from 'react'
+import toast from 'react-hot-toast'
 import { useAuth } from '../contexts/AuthContext'
 import { useBoards } from '../hooks/useBoards'
 import { getInitials } from '../lib/utils'
 import BoardCard from '../components/boards/BoardCard'
 import CreateBoardModal from '../components/boards/CreateBoardModal'
-
-function CardSkeleton() {
-  return (
-    <div className="animate-pulse rounded-2xl border border-gray-200 bg-white p-5">
-      <div className="flex items-center gap-2">
-        <div className="h-3 w-3 rounded-full bg-gray-200" />
-        <div className="h-4 w-32 rounded bg-gray-200" />
-      </div>
-      <div className="mt-4 h-3 w-20 rounded bg-gray-200" />
-      <div className="mt-3 h-2 w-full rounded-full bg-gray-200" />
-      <div className="mt-4 flex gap-2">
-        <div className="h-6 w-6 rounded-full bg-gray-200" />
-        <div className="h-6 w-6 rounded-full bg-gray-200" />
-      </div>
-    </div>
-  )
-}
+import { CardSkeleton } from '../components/shared/Skeleton'
 
 export default function Dashboard() {
   const { currentUser, signOut } = useAuth()
@@ -30,12 +15,19 @@ export default function Dashboard() {
   const displayName = currentUser?.displayName ?? currentUser?.email ?? 'there'
 
   async function handleCreate(name: string, color: string) {
-    await createBoard(name, color)
+    try {
+      await createBoard(name, color)
+      toast.success('Board created')
+    } catch (err) {
+      console.error('createBoard failed:', err)
+      toast.error('Could not create board')
+      throw err
+    }
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="flex items-center justify-between border-b border-gray-200 bg-white px-6 py-4">
+    <div className="min-h-screen bg-gray-50 pb-[env(safe-area-inset-bottom)]">
+      <header className="flex items-center justify-between border-b border-gray-200 bg-white px-4 py-3 sm:px-6 sm:py-4">
         <div className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-sm font-bold text-white">
             DB
@@ -43,13 +35,14 @@ export default function Dashboard() {
           <span className="text-lg font-semibold text-gray-900">DoBoard</span>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <button
             type="button"
             onClick={() => setShowModal(true)}
-            className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-indigo-700"
+            className="flex min-h-[44px] items-center rounded-lg bg-indigo-600 px-3 text-sm font-medium text-white transition hover:bg-indigo-700"
           >
-            + New Board
+            <span className="sm:hidden">+ New</span>
+            <span className="hidden sm:inline">+ New Board</span>
           </button>
           <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-700">
             {getInitials(displayName)}
@@ -60,14 +53,14 @@ export default function Dashboard() {
           <button
             type="button"
             onClick={() => signOut()}
-            className="rounded-lg border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+            className="flex min-h-[44px] items-center rounded-lg border border-gray-300 px-3 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
           >
             Sign out
           </button>
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-6 py-8">
+      <main className="mx-auto max-w-5xl px-4 py-6 sm:px-6 sm:py-8">
         <h1 className="text-2xl font-bold text-gray-900">Your boards</h1>
 
         {loading ? (
@@ -78,19 +71,19 @@ export default function Dashboard() {
           </div>
         ) : boards.length === 0 ? (
           <div className="mt-16 flex flex-col items-center justify-center text-center">
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-100 text-2xl">
+            <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-indigo-100 text-4xl">
               📋
             </div>
-            <p className="mt-4 text-base font-medium text-gray-900">
+            <p className="mt-5 text-lg font-semibold text-gray-900">
               No boards yet
             </p>
             <p className="mt-1 text-sm text-gray-500">
-              Create one to get started.
+              Create your first board to get started.
             </p>
             <button
               type="button"
               onClick={() => setShowModal(true)}
-              className="mt-5 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
+              className="mt-6 min-h-[44px] rounded-lg bg-indigo-600 px-5 text-sm font-medium text-white transition hover:bg-indigo-700"
             >
               + New Board
             </button>

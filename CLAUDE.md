@@ -167,7 +167,7 @@ service cloud.firestore {
 | 4 | Task Enhancements | ✅ Done |
 | 5 | Collaboration | ✅ Done |
 | 6 | Progress Tracker & Insights | ✅ Done |
-| 7 | PWA + Polish | ⬜ Todo |
+| 7 | PWA + Polish | ✅ Done |
 
 ---
 
@@ -411,25 +411,25 @@ service cloud.firestore {
     workbox: { globPatterns: ['**/*.{js,css,html,ico,png,svg}'] }
   })
   ```
-- [ ] Create simple app icons: `public/icon-192.png` and `public/icon-512.png` (use a simple colored square with "DB" text via Canvas or a placeholder)
-- [ ] Add `react-hot-toast` `<Toaster>` to `App.tsx`
-- [ ] Add toast notifications to all actions: task added, task deleted, board created, board deleted, member invited, link copied, error states
-- [ ] Create `src/components/shared/Skeleton.tsx` — gray animated pulse blocks in card shape and row shape
-- [ ] Use `Skeleton` in `BoardGrid` (while loading boards) and `TaskList` (while loading tasks)
-- [ ] Empty states:
+- [x] Create simple app icons: `public/icon-192.png` and `public/icon-512.png` (use a simple colored square with "DB" text via Canvas or a placeholder)
+- [x] Add `react-hot-toast` `<Toaster>` to `App.tsx`
+- [x] Add toast notifications to all actions: task added, task deleted, board created, board deleted, member invited, link copied, error states
+- [x] Create `src/components/shared/Skeleton.tsx` — gray animated pulse blocks in card shape and row shape
+- [x] Use `Skeleton` in `BoardGrid` (while loading boards) and `TaskList` (while loading tasks)
+- [x] Empty states:
   - Dashboard: illustration + "Create your first board to get started"
   - Task list: "No tasks yet — add one above"
   - Insights: "Add some tasks to see insights"
-- [ ] Mobile responsiveness audit:
+- [x] Mobile responsiveness audit:
   - Dashboard: 1-col on mobile, 2-col on md+
   - BoardDetail: full screen, bottom sheet for TaskDetailPanel on mobile
   - Touch targets: all interactive elements min 44×44px
   - Bottom padding on mobile for safe area
-- [ ] Route-level code splitting: wrap all page imports in `React.lazy` + `<Suspense>`
-- [ ] Final check: `npm run build` succeeds, `npm run preview` shows PWA
-- [ ] Deploy to Vercel: `npx vercel --prod` (or via GitHub auto-deploy)
-- [ ] Update Phase 7 status in this file to ✅ Done
-- [ ] Commit: `git add . && git commit -m "feat: Phase 7 — PWA config, polish, and production build"`
+- [x] Route-level code splitting: wrap all page imports in `React.lazy` + `<Suspense>`
+- [x] Final check: `npm run build` succeeds, `npm run preview` shows PWA
+- [~] Deploy to Vercel: `npx vercel --prod` (or via GitHub auto-deploy) — **user is handling deploy.** `vercel.json` (SPA rewrites) is in the repo and ready.
+- [x] Update Phase 7 status in this file to ✅ Done
+- [x] Commit: `git add . && git commit -m "feat: Phase 7 — PWA config, polish, and production build"`
 
 ---
 
@@ -446,3 +446,9 @@ _Add notes as the project evolves._
 - Presence uses `presence/{uid}_{boardId}` docs; `usePresence` queries by `boardId` (single field, no composite index needed) and treats `lastSeen` within 60s as online.
 - **Phase 6:** Firestore rules and composite indexes are now managed in-repo (`firestore.rules`, `firestore.indexes.json`, `firebase.json`, `.firebaserc`) and were deployed to `doboard-7e6ba` via `firebase deploy --only firestore:rules,firestore:indexes`. The widened self-join board rule is live. Indexes: `boards(members array-contains, updatedAt desc)` and `tasks(boardId asc, archived asc, createdAt asc)`.
 - **Phase 6:** Insights compute from the active (non-archived) task list, so archiving done tasks removes them from the stat cards and charts. Member contribution attributes each completed task to its `assignee`, falling back to `createdBy`.
+- **Phase 7:** Board deletion (`deleteBoard` in `lib/boards.ts`) batch-deletes all of a board's tasks (chunks of 450) then the board doc; exposed as a creator-only trash button on `BoardCard` with a `window.confirm` guard. This implements the "delete tasks with the board" note above.
+- **Phase 7:** Toasts live in the mutation functions (`useTasks` add/delete/archive, `Dashboard` create, `BoardCard` delete) plus the collaboration modals, so coverage is centralized. `toggleDone` only toasts on error to avoid noise.
+- **Phase 7:** Icons (`public/icon-192.png`, `icon-512.png`) are generated placeholders (indigo square + "DB"). Replace with real artwork before a public launch.
+- **Phase 7:** Code splitting — pages are `React.lazy`-loaded. Recharts rides along in the `BoardDetail` chunk (~392 KB), so it only downloads when a board is opened. The main chunk (~601 KB) is Firebase core, needed app-wide.
+- **Phase 7:** Hover-only controls (task/board delete) are always visible on mobile (`opacity-100 sm:opacity-0 sm:group-hover:opacity-100`) because `group-hover` never fires on touch.
+- **Phase 7 / deploy:** Vercel CLI isn't installed here and login is interactive, so the deploy is left to the user. `vercel.json` adds the SPA rewrite (`/(.*) → /index.html`) required for client-side routes like `/board/:id` and `/join/:id`. Remember to set the `VITE_FIREBASE_*` env vars in the Vercel project settings (they're gitignored).
