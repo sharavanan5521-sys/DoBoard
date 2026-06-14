@@ -158,7 +158,7 @@ service cloud.firestore {
 | Phase | Name | Status |
 |---|---|---|
 | 0 | Setup & Foundation | ✅ Done |
-| 1 | Auth & User Profile | ⬜ Todo |
+| 1 | Auth & User Profile | ✅ Done |
 | 2 | Boards Dashboard | ⬜ Todo |
 | 3 | Tasks — Core CRUD + Real-time | ⬜ Todo |
 | 4 | Task Enhancements | ⬜ Todo |
@@ -200,21 +200,21 @@ service cloud.firestore {
 **Goal:** Google sign-in flow, auth context, protected routes, user document in Firestore.
 
 ### Tasks
-- [ ] Create `src/contexts/AuthContext.tsx`:
+- [x] Create `src/contexts/AuthContext.tsx`:
   - State: `currentUser` (Firebase User | null), `loading`
   - Functions: `signInWithGoogle()`, `signOut()`
   - On sign-in: create `users/{uid}` doc in Firestore if it doesn't exist (setDoc with merge)
   - Export `useAuth()` hook
-- [ ] Wrap `App.tsx` with `<AuthProvider>`
-- [ ] Build `LoginPage.tsx`:
+- [x] Wrap `App.tsx` with `<AuthProvider>`
+- [x] Build `LoginPage.tsx`:
   - Centered layout, app name "DoBoard", tagline
   - "Sign in with Google" button (use Google logo SVG inline)
   - Show loading spinner while signing in
-- [ ] Wire `ProtectedRoute.tsx` — show loading spinner while `loading === true`, redirect to `/login` if no user
-- [ ] Update `Dashboard.tsx` to show `currentUser.displayName` in the header with sign out button
-- [ ] Verify: visit `/`, redirected to `/login`, sign in works, redirected back to `/`, user name appears
-- [ ] Update Phase 1 status in this file to ✅ Done
-- [ ] Commit: `git add . && git commit -m "feat: Phase 1 — Firebase Auth with Google sign-in"`
+- [x] Wire `ProtectedRoute.tsx` — show loading spinner while `loading === true`, redirect to `/login` if no user
+- [x] Update `Dashboard.tsx` to show `currentUser.displayName` in the header with sign out button
+- [x] Verify: visit `/`, redirected to `/login`, sign in works, redirected back to `/`, user name appears
+- [x] Update Phase 1 status in this file to ✅ Done
+- [x] Commit: `git add . && git commit -m "feat: Phase 1 — Firebase Auth with Google sign-in"`
 
 ---
 
